@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <style>
+        /* Background styles */
+        html {
+            background-color: black;
+        }
+        
+        body {
+            background-image: radial-gradient(circle at top center, rgb(244, 234, 104),rgb(234, 179, 103),rgb(224, 125, 103),rgb(214, 70, 102),rgb(204, 15, 101));
+        }
+
+        main {
+            min-height: 90vh;
+        }
+
+        .glass {
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.75);            
+        }
+
+        /* Glassmorphism card effect */
+        @media screen and (min-width: 480px) {
+                
+            
+            .card {
+                backdrop-filter: blur(16px) saturate(180%);
+                -webkit-backdrop-filter: blur(16px) saturate(180%);
+                background-color: rgba(255, 255, 255, 0.75);
+                border-radius: 12px;
+                border: 1px solid rgba(209, 213, 219, 0.3);
+                box-shadow: 4px 1px 8px;
+            }
+        }
+
+        footer {
+            background: black;
+            color: gray;
+        }
+        
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg glass">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">OAuth2 Demo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/">Inicio</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                {% if access_token %}
+                    <form action="/logout" method="post">
+                        <input type="submit" class="nav-link btn btn-link" value="Logout">
+                    </form>
+                {% else %}
+                    <a class="nav-link" href="/login">Login</a>
+                {% endif %}
+            </li>
+        </ul>
+        </div>
+    </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+
+    <footer class="container-fluid">
+        &copy; 2024 Jairo Chapela
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>    
+</body>
+</html>

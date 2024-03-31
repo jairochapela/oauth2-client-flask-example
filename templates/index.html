@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<main class="card container mt-4 mb-4 text-center pt-4">
+    <h1>Bienvenido a casa, {{username}}</h1>
+
+    <p>Información del usuario:</p>
+    <dl class="row">
+        {% if username %}
+        <dt class="col-sm-3">Usuario</dt>
+        <dd class="col-sm-9">{{username}}</dd>
+        {% endif %}
+        
+        {%if user_info %}
+        <dt class="col-sm-3">Nombre</dt>
+        <dd class="col-sm-9">{{user_info.name}}</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">{{user_info.email}}</dd>
+        {% endif %}
+        <dt class="col-sm-3">Token de acceso</dt>
+        <dd class="col-sm-9"><code>{{access_token}}</code></dd>
+</main>
+
+{% endblock %}
