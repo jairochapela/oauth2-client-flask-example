@@ -2,7 +2,6 @@ from functools import wraps
 from flask import Flask, redirect, render_template, request, session, url_for
 import requests
 import os
-import jwt
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,7 +24,7 @@ def login_required(f):
 def home():
     access_token = session['access_token'] if 'access_token' in session else None
     username = session['username'] if 'username' in session else None
-    return render_template('index.html', access_token=access_token, username=username)
+    return render_template('index.html', access_token=access_token, username=username, user_data=session.get('user_data'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -67,18 +66,17 @@ def callback():
     session['access_token'] = access_token
 
 
-    # token_data = jwt.decode(access_token, algorithms=["HS256"], verify=False)
-    # session['username'] = token_data.get('preferred_username')
 
     url_resource_owner_details = app.config['URL_RESOURCE_OWNER_DETAILS']
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.get(url_resource_owner_details, headers)
+    response = requests.get(url_resource_owner_details, headers=headers)
     if response.status_code == 200:
         user_data = response.json()
         print(user_data)
-        session['username'] = user_data.get('preferred_username')
+        session['user_data'] = user_data
+        session['username'] = user_data.get('name')
     else:
         session['username'] = None
 
