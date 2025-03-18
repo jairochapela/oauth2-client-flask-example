@@ -5,7 +5,11 @@ Este proyecto representa un esquema minimalista de autenticación basado en OAut
 
 ## Preparación del entorno de pruebas
 
-Para poder ejecutar este proyecto, es necesario disponer de un servidor SSO compatible con el protocolo OAuth2. Para este ejemplo, optaremos por un servidor [Keycloak](https://www.keycloak.org). Se puede utilizar el siguiente comando que pone en marcha el servidor en un contenedor Docker:
+Para poder ejecutar este proyecto, es necesario disponer de un servidor SSO compatible con el protocolo OAuth2.
+
+### Keycloak
+
+Para este ejemplo, optaremos por un servidor [Keycloak](https://www.keycloak.org). Se puede utilizar el siguiente comando que pone en marcha el servidor en un contenedor Docker:
 
 ```shell
 docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:24.0.2 start-dev
@@ -23,6 +27,35 @@ Acto seguido, se ha de crear un cliente en el servidor Keycloak. Para ello, se h
 
 Lo siguiente es crear uno o varios usuarios en el servidor Keycloak. Para ello, se ha de acceder a la [interfaz de administración de Keycloak](http://localhost:8080/admin) y añadir usuarios con sus respectivas contraseñas.
 
+### Amazon Cognito
+
+Otra opción es utilizar [Amazon Cognito](https://aws.amazon.com/es/cognito/). Para ello, se ha de crear un nuevo usuario en el servicio y configurar un nuevo cliente de aplicación.
+
+Para crear usuarios, ha de visitarse la [consola de Amazon Cognito](https://console.aws.amazon.com/cognito/users/). Una vez dentro, se ha de seleccionar el pool de usuarios y crear un nuevo usuario. Se puede indicar el nombre de usuario y los atributos del usuario; también se puede indicar una contraseña temporal que el usuario deberá cambiar en su primer acceso o utilizar una generada automáticamente.
+
+El siguiente paso es crear un **cliente de aplicación**. Para ello, ha de visitarse la [consola de Amazon Cognito](https://console.aws.amazon.com/cognito/users/). Una vez dentro, se ha de seleccionar el pool de usuarios y acceder al apartado de **Clientes de aplicación** (**App clients**). Se ha de crear un nuevo cliente de aplicación con los siguientes datos:
+
+- **Tipo de aplicación**: Aplicación web tradicional
+- **Nombre de cliente**: *(elegir un nombre)*
+- **URL de retorno**: `http://localhost:5000/callback`
+
+Tras introducir estos datos, se ha de guardar el cliente y se mostrarán los datos de configuración del cliente. Se han de copiar los valores de **ID de cliente** y **Secreto de cliente** para configurar la aplicación cliente.
+
+Es importante conocer los *endpoints* de autorización y acceso a los recursos. Dichos endpoints dependen del pool de usuarios y de la región en la que se haya creado el pool. Para obtener los datos de configuración, se tomará el ID del pool de usuarios y la región para construir los *endpoints* de la siguiente forma:
+
+- **Dominio del pool de usuarios**: `https://<pool>.auth.<region>.amazoncognito.com`
+- **Endpoint de autorización**: `https://<pool>.auth.<region>.amazoncognito.com/oauth2/authorize`
+- **Endpoint de acceso al token**: `https://<pool>.auth.<region>.amazoncognito.com/oauth2/token`
+- **Endpoint de detalles del propietario del recurso**: `https://<pool>.auth.<region>.amazoncognito.com/oauth2/userInfo`
+
+Más información en [User-interactive managed login and classic hosted UI endpoints](https://docs.aws.amazon.com/cognito/latest/developerguide/managed-login-endpoints.html).
+
+Una vez hecho esto, se han de configurar los datos del SSO en el fichero `config.ini` (ver más abajo).
+
+
+
+## Puesta en marcha
+
 Una vez hecho esto, se procederá a poner en marcha la aplicación cliente. Para ello, se ha de clonar este repositorio y ejecutar los siguientes comandos:
 
 ```shell
@@ -31,7 +64,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Una vez instaladas las dependencias, se han de configurar los datos del SSO en el fichero `.env` (ver más abajo) y ejecutar la aplicación con el siguiente comando:
+Una vez instaladas las dependencias, se han de configurar los datos del SSO en el fichero `config.ini` (ver más abajo) y ejecutar la aplicación con el siguiente comando:
 
 ```shell
 flask run
@@ -40,16 +73,19 @@ flask run
 
 ## Ajustes
 
-Los ajustes han de incorporarse a un fichero ``.env`` o mediante variables de entorno. Dicho fichero contendrá algo similar a:
+Los ajustes han de incorporarse a un fichero `config.ini` o mediante variables de entorno. Dicho fichero contendrá algo similar a:
 
-```
-CLIENT_ID=123
-CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxx
-REDIRECT_URI=http://localhost:5000/callback
-URL_AUTHORIZE=http://localhost:8080/realms/master/protocol/openid-connect/auth
-URL_ACCESS_TOKEN=http://localhost:8080/realms/master/protocol/openid-connect/token
-URL_RESOURCE_OWNER_DETAILS=http://localhost:8080/realms/master/protocol/openid-connect/userinfo
-SECRET_KEY=yyyyyyyyyyyyy
+```ini
+[App]
+secret_key=zzzzzzzzzzzzzz
+
+[OAuth2]
+client_id=yyyyyyyyyyyy
+client_secret=xxxxxxxxxxxxxxxxxxxxxxxxxxx
+redirect_uri=http://localhost:5000/callback
+url_authorize=https://example.com/oauth2/authorize
+url_access_token=https://example.com/oauth2/token
+url_resource_owner_details=https://example.com/oauth2/userInfo
 ```
 
 ## Funcionamiento

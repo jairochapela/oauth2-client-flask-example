@@ -2,12 +2,16 @@ from functools import wraps
 from flask import Flask, redirect, render_template, request, session, url_for
 import requests
 import os
-from dotenv import load_dotenv
-load_dotenv()
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+
 
 app = Flask(__name__)
-app.config.update(**os.environ)
-app.secret_key = os.environ['SECRET_KEY']
+app.config.update(**config['OAuth2'])
+app.secret_key = config['App']['secret_key']
 
 
 def login_required(f):
@@ -30,9 +34,9 @@ def home():
 def login():
     if request.method == 'POST':
         # Redirect the user to the OAuth2 provider's authorization endpoint
-        url_authorize = app.config['URL_AUTHORIZE']
-        redirect_uri = app.config['REDIRECT_URI']
-        client_id = app.config['CLIENT_ID']
+        url_authorize = app.config['url_authorize']
+        redirect_uri = app.config['redirect_uri']
+        client_id = app.config['client_id']
         scope = 'openid' # profile email phone address'
         state = 'random_state_value'
         return redirect(f'{url_authorize}?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}&state={state}')
@@ -49,13 +53,13 @@ def callback():
     state = request.args.get('state')
     
     # Exchange the authorization code for an access token
-    url_access_token = app.config['URL_ACCESS_TOKEN']
+    url_access_token = app.config['url_access_token']
     response = requests.post(url_access_token, data={
         'grant_type': 'authorization_code',
         'code': code,
-        'client_id': app.config['CLIENT_ID'],
-        'client_secret': app.config['CLIENT_SECRET'],
-        'redirect_uri': app.config['REDIRECT_URI']
+        'client_id': app.config['client_id'],
+        'client_secret': app.config['client_secret'],
+        'redirect_uri': app.config['redirect_uri']
     })
     
     # Process the access token
@@ -67,7 +71,7 @@ def callback():
 
 
 
-    url_resource_owner_details = app.config['URL_RESOURCE_OWNER_DETAILS']
+    url_resource_owner_details = app.config['url_resource_owner_details']
     headers = {
         'Authorization': f'Bearer {access_token}'
     }

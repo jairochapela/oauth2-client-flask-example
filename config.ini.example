@@ -1,0 +1,10 @@
+[App]
+secret_key=zzzzzzzzzzzzzz
+
+[OAuth2]
+client_id=yyyyyyyyyyyy
+client_secret=xxxxxxxxxxxxxxxxxxxxxxxxxxx
+redirect_uri=http://localhost:5000/callback
+url_authorize=https://example.com/oauth2/authorize
+url_access_token=https://example.com/oauth2/token
+url_resource_owner_details=https://example.com/oauth2/userInfo
